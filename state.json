@@ -28,5 +28,18 @@
   "Thyme & Whisk::swiggy": [
     "10% OFF",
     "FLAT ₹200 OFF"
-  ]
+  ],
+  "Tokyo Bakery::zomato": [
+    "10% OFF",
+    "12% OFF",
+    "15% OFF",
+    "20% OFF",
+    "25% OFF",
+    "FLAT ₹250 OFF",
+    "FLAT ₹300 OFF",
+    "FLAT ₹350 OFF",
+    "FLAT ₹400 OFF",
+    "FLAT ₹500 OFF"
+  ],
+  "Tokyo Bakery::swiggy": []
 }
