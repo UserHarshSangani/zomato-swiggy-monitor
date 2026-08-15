@@ -1,0 +1,15 @@
+{
+  "restaurants": [
+    {
+      "name": "Bella Brew",
+      "zomatoUrl": "https://www.zomato.com/nagpur/bella-brew-dharampeth",
+      "swiggyUrl": "https://www.swiggy.com/restaurants/bella-brew-dharampeth-nagpur-835403/dineout"
+    },
+    {
+      "name": "Curry Leaves",
+      "zomatoUrl": "https://www.zomato.com/nagpur/curry-leaves-6-lakadganj",
+      "swiggyUrl": "https://www.swiggy.com/restaurants/PASTE-ACTUAL-SLUG-HERE"
+    }
+  ],
+  "checkIntervalMinutes": 30
+}

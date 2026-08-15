@@ -1,0 +1,16 @@
+{
+  "name": "zomato-swiggy-monitor",
+  "version": "1.0.0",
+  "description": "Watches your restaurants' Zomato/Swiggy listing pages and pings you on Telegram when an offer/discount appears, disappears, or changes.",
+  "main": "monitor.js",
+  "scripts": {
+    "check": "node monitor.js",
+    "watch": "node monitor.js --watch"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "playwright": "^1.47.0",
+    "playwright-extra": "^4.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  }
+}
