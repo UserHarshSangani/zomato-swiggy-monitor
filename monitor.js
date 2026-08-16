@@ -20,9 +20,6 @@ chromium.use(stealth);
 const CONFIG_PATH = path.join(__dirname, "config.json");
 const STATE_PATH = path.join(__dirname, "state.json");
 
-// Patterns we consider "offer signals" on a restaurant page.
-// Kept broad on purpose -- better to over-catch and let you eyeball the diff
-// than to miss something because of one narrow regex.
 const OFFER_PATTERNS = [
   /\d{1,3}%\s*OFF/gi,
   /FLAT\s*(?:RS\.?|₹)\s*\d+\s*OFF/gi,
@@ -44,14 +41,12 @@ function saveJSON(filePath, data) {
 }
 
 async function extractOffers(page) {
-  // Grab all visible text on the page, then pull out offer-looking substrings.
   const bodyText = await page.evaluate(() => document.body.innerText || "");
   const found = new Set();
 
   for (const pattern of OFFER_PATTERNS) {
     const matches = bodyText.match(pattern) || [];
     for (const m of matches) {
-      // normalize whitespace so "20%   OFF" and "20% OFF" count as the same thing
       found.add(m.replace(/\s+/g, " ").trim().toUpperCase());
     }
   }
@@ -68,9 +63,6 @@ async function scrapePlatform(browser, url) {
     },
   });
 
-  // Some sites (Zomato in particular) reject the HTTP/2 handshake from
-  // headless Chrome with net::ERR_HTTP2_PROTOCOL_ERROR. Retry once over
-  // plain HTTP/1.1-friendly settings before giving up on that page.
   const attempts = [
     { waitUntil: "domcontentloaded", timeout: 45000 },
     { waitUntil: "load", timeout: 60000 },
@@ -80,7 +72,6 @@ async function scrapePlatform(browser, url) {
   for (const opts of attempts) {
     try {
       await page.goto(url, opts);
-      // Give the page a moment to render offer banners after the initial load.
       await page.waitForTimeout(4000);
       const offers = await extractOffers(page);
       await page.close();
@@ -90,9 +81,6 @@ async function scrapePlatform(browser, url) {
     }
   }
 
-  // Couldn't load normally after all attempts -- grab a screenshot of
-  // whatever's actually on screen (CAPTCHA, block page, cookie wall, etc.)
-  // so we can see what's really happening instead of guessing from the error text.
   let screenshotPath = null;
   try {
     const debugDir = path.join(__dirname, "debug-screenshots");
@@ -140,6 +128,34 @@ async function sendTelegramAlert(message) {
   }
 }
 
+const LOVABLE_INGEST_URL = "https://peerco-pulse.lovable.app/api/public/ingest-listing-offers";
+
+async function sendToLovable(clientName, platform, offers) {
+  const secret = process.env.INGEST_SECRET;
+  if (!secret) {
+    console.error("Lovable ingest skipped: missing INGEST_SECRET env var.");
+    return;
+  }
+
+  try {
+    const res = await fetch(LOVABLE_INGEST_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-ingest-secret": secret,
+      },
+      body: JSON.stringify({ client_name: clientName, platform, offers }),
+    });
+
+    if (!res.ok) {
+      const body = await res.text();
+      console.error(`Lovable ingest failed for ${clientName} (${platform}):`, res.status, body);
+    }
+  } catch (err) {
+    console.error(`Lovable ingest error for ${clientName} (${platform}):`, err.message);
+  }
+}
+
 function diffOffers(previous = [], current = []) {
   const prevSet = new Set(previous);
   const currSet = new Set(current);
@@ -158,7 +174,7 @@ async function checkRestaurant(browser, state, restaurant) {
 
   for (const platform of platforms) {
     if (!platform.url || platform.url.includes("PASTE-ACTUAL-SLUG-HERE")) {
-      continue; // skip unconfigured entries
+      continue;
     }
 
     const stateKey = `${restaurant.name}::${platform.key}`;
@@ -171,15 +187,17 @@ async function checkRestaurant(browser, state, restaurant) {
       if (result.screenshotPath) {
         console.error(`    Debug screenshot saved: ${result.screenshotPath}`);
       }
-      // Optional: alert on repeated scrape failures too (page structure may have changed)
       continue;
     }
+
+    // Push the latest snapshot to the Brand Growth Hub dashboard, regardless
+    // of whether it changed -- that table always holds the current picture.
+    await sendToLovable(restaurant.name, platform.key, result.offers);
 
     const previousOffers = state[stateKey] || [];
     const diff = diffOffers(previousOffers, result.offers);
 
     if (diff.changed && state[stateKey] !== undefined) {
-      // Only alert if we HAD a previous snapshot -- first run just establishes baseline.
       const lines = [`⚠️ <b>${restaurant.name} — ${platform.label}</b> offer change detected:`];
       if (diff.added.length) lines.push(`➕ Added: ${diff.added.join(", ")}`);
       if (diff.removed.length) lines.push(`➖ Removed: ${diff.removed.join(", ")}`);
@@ -231,7 +249,6 @@ async function main() {
   const intervalMs = (config.checkIntervalMinutes || 30) * 60 * 1000;
 
   console.log(`Watch mode: checking every ${config.checkIntervalMinutes || 30} min. Ctrl+C to stop.`);
-  // Run once immediately, then on the interval.
   await runCheck();
   setInterval(runCheck, intervalMs);
 }
