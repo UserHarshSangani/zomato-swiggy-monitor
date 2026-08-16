@@ -6,6 +6,16 @@
       "swiggyUrl": "https://www.swiggy.com/restaurants/bella-brew-dharampeth-nagpur-835403/dineout"
     },
     {
+      "name": "Thyme & Whisk",
+      "zomatoUrl": "https://www.zomato.com/pune/thyme-whisk-koregaon-park",
+      "swiggyUrl": "https://www.swiggy.com/restaurants/pune/koregaon-park/thyme-whisk-koregaon-park-962606/dineout"
+    },
+    {
+      "name": "Tokyo Bakery",
+      "zomatoUrl": "https://www.zomato.com/pune/tokyo-bakery-viman-nagar/info",
+      "swiggyUrl": "https://www.swiggy.com/city/pune/tokyo-bakery-viman-nagar-rest1096537"
+    },
+    {
       "name": "Curry Leaves",
       "zomatoUrl": "https://www.zomato.com/nagpur/curry-leaves-6-lakadganj",
       "swiggyUrl": "https://www.swiggy.com/restaurants/PASTE-ACTUAL-SLUG-HERE"
