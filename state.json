@@ -1,5 +1,11 @@
 {
-  "Bella Brew::swiggy": [],
+  "Bella Brew::swiggy": [
+    "10% OFF",
+    "15% OFF",
+    "40% OFF",
+    "50% OFF",
+    "FLAT ₹200 OFF"
+  ],
   "Bella Brew::zomato": [
     "15% OFF",
     "25% OFF",
@@ -26,5 +32,8 @@
     "25% OFF",
     "FLAT ₹175 OFF"
   ],
-  "Thyme and Whisk::swiggy": []
+  "Thyme and Whisk::swiggy": [
+    "10% OFF",
+    "FLAT ₹200 OFF"
+  ]
 }
